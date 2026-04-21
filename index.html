@@ -1,0 +1,935 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Игровой тренажёр: обособленные дополнения</title>
+  <style>
+    :root {
+      --bg1: #f4fff1;
+      --bg2: #e6f7dc;
+      --card: #ffffffee;
+      --green-1: #dff5cf;
+      --green-2: #a9de8f;
+      --green-3: #6fbc62;
+      --green-4: #2f7d32;
+      --green-5: #1f5a24;
+      --text: #1d2d1f;
+      --danger: #d64a4a;
+      --danger-bg: #ffe6e6;
+      --success: #267a2a;
+      --success-bg: #e5f8e6;
+      --shadow: 0 14px 35px rgba(46, 109, 56, 0.14);
+      --radius: 22px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 10% 15%, rgba(111,188,98,0.18) 0, rgba(111,188,98,0.18) 90px, transparent 91px),
+        radial-gradient(circle at 88% 12%, rgba(47,125,50,0.13) 0, rgba(47,125,50,0.13) 70px, transparent 71px),
+        radial-gradient(circle at 90% 85%, rgba(169,222,143,0.35) 0, rgba(169,222,143,0.35) 120px, transparent 121px),
+        radial-gradient(circle at 8% 82%, rgba(111,188,98,0.16) 0, rgba(111,188,98,0.16) 95px, transparent 96px),
+        linear-gradient(135deg, var(--bg1), var(--bg2));
+      min-height: 100vh;
+    }
+
+    .page {
+      width: min(1100px, calc(100% - 24px));
+      margin: 0 auto;
+      padding: 24px 0 36px;
+    }
+
+    .hero {
+      background: linear-gradient(135deg, rgba(255,255,255,0.96), rgba(232,248,221,0.96));
+      border: 1px solid rgba(111,188,98,0.25);
+      border-radius: 28px;
+      box-shadow: var(--shadow);
+      padding: 24px;
+      margin-bottom: 18px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      right: -30px;
+      top: -30px;
+      width: 170px;
+      height: 170px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(111,188,98,0.18), rgba(111,188,98,0.05));
+    }
+
+    .title {
+      margin: 0 0 8px;
+      font-size: clamp(1.6rem, 2vw + 1rem, 2.5rem);
+      line-height: 1.15;
+      color: var(--green-5);
+    }
+
+    .subtitle {
+      margin: 0;
+      font-size: 1rem;
+      line-height: 1.6;
+      max-width: 760px;
+    }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--card);
+      border-radius: 20px;
+      box-shadow: var(--shadow);
+      padding: 16px 18px;
+      margin-bottom: 18px;
+      border: 1px solid rgba(111,188,98,0.18);
+    }
+
+    .progress-wrap {
+      flex: 1 1 320px;
+    }
+
+    .progress-label {
+      font-weight: 700;
+      color: var(--green-5);
+      margin-bottom: 8px;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 14px;
+      border-radius: 999px;
+      background: #deedd9;
+      overflow: hidden;
+      border: 1px solid rgba(47,125,50,0.14);
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--green-3), var(--green-4));
+      transition: width .35s ease;
+    }
+
+    .score-pill {
+      padding: 12px 16px;
+      border-radius: 999px;
+      background: linear-gradient(135deg, var(--green-1), #f7fff6);
+      font-weight: 700;
+      color: var(--green-5);
+      border: 1px solid rgba(47,125,50,0.2);
+      white-space: nowrap;
+    }
+
+    .panel {
+      background: var(--card);
+      border-radius: 28px;
+      box-shadow: var(--shadow);
+      border: 1px solid rgba(111,188,98,0.18);
+      padding: 24px;
+    }
+
+    .hidden { display: none !important; }
+
+    .screen {
+      display: grid;
+      gap: 18px;
+    }
+
+    .welcome {
+      text-align: center;
+      padding: 16px 0 6px;
+    }
+
+    .welcome h2 {
+      margin: 0 0 10px;
+      color: var(--green-5);
+      font-size: clamp(1.4rem, 1.8vw + 1rem, 2rem);
+    }
+
+    .welcome p {
+      margin: 0 auto;
+      max-width: 760px;
+      line-height: 1.65;
+    }
+
+    .rules {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 14px;
+      margin-top: 10px;
+    }
+
+    .rule-card {
+      padding: 16px;
+      border-radius: 20px;
+      background: linear-gradient(180deg, #fafff7, #eef9e8);
+      border: 1px solid rgba(111,188,98,0.22);
+      text-align: left;
+    }
+
+    .rule-card .num {
+      width: 34px;
+      height: 34px;
+      display: inline-grid;
+      place-items: center;
+      border-radius: 50%;
+      background: var(--green-3);
+      color: white;
+      font-weight: 800;
+      margin-bottom: 10px;
+    }
+
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+      justify-content: center;
+      margin-top: 8px;
+    }
+
+    button {
+      border: 0;
+      cursor: pointer;
+      border-radius: 16px;
+      font-weight: 700;
+      transition: transform .14s ease, box-shadow .14s ease, opacity .14s ease;
+    }
+
+    button:hover { transform: translateY(-1px); }
+    button:active { transform: translateY(1px); }
+    button:disabled { opacity: .55; cursor: not-allowed; transform: none; }
+
+    .btn-primary {
+      padding: 14px 22px;
+      background: linear-gradient(135deg, var(--green-3), var(--green-4));
+      color: white;
+      box-shadow: 0 8px 18px rgba(47,125,50,0.22);
+    }
+
+    .btn-secondary {
+      padding: 12px 18px;
+      background: #edf8e7;
+      color: var(--green-5);
+      border: 1px solid rgba(47,125,50,0.18);
+    }
+
+    .question-head {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .question-head h3 {
+      margin: 0;
+      color: var(--green-5);
+      font-size: clamp(1.15rem, 1vw + 1rem, 1.45rem);
+    }
+
+    .tag {
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: #edf8e7;
+      color: var(--green-5);
+      font-weight: 700;
+      border: 1px solid rgba(47,125,50,0.16);
+    }
+
+    .sentence-card, .block {
+      background: linear-gradient(180deg, #ffffff, #f8fff5);
+      border-radius: 22px;
+      border: 1px solid rgba(111,188,98,0.18);
+      padding: 18px;
+    }
+
+    .sentence-card p {
+      margin: 0 0 10px;
+      font-weight: 700;
+      color: var(--green-5);
+    }
+
+    .sentence-text {
+      font-size: clamp(1.08rem, 1vw + 0.95rem, 1.3rem);
+      line-height: 2.1;
+    }
+
+    .token, .gap {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin: 4px 4px 4px 0;
+      vertical-align: middle;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .token {
+      min-height: 42px;
+      padding: 7px 12px;
+      border-radius: 14px;
+      border: 2px solid rgba(111,188,98,0.22);
+      background: #fff;
+      cursor: pointer;
+      transition: background .14s ease, border-color .14s ease, transform .14s ease;
+    }
+
+    .token:hover {
+      border-color: rgba(47,125,50,0.45);
+      transform: translateY(-1px);
+    }
+
+    .token.selected {
+      background: #d9f2c9;
+      border-color: var(--green-4);
+      color: var(--green-5);
+      font-weight: 700;
+    }
+
+    .token.correct {
+      background: #cff0c4;
+      border-color: var(--success);
+    }
+
+    .token.locked,
+    .gap.locked {
+      pointer-events: none;
+    }
+
+    .gap {
+      width: 18px;
+      height: 42px;
+      border-radius: 9px;
+      cursor: pointer;
+      position: relative;
+      background: transparent;
+      border: 1px dashed rgba(47,125,50,0.22);
+      transition: background .14s ease, border-color .14s ease;
+    }
+
+    .gap:hover {
+      background: rgba(111,188,98,0.1);
+      border-color: rgba(47,125,50,0.42);
+    }
+
+    .gap.selected {
+      background: #d9f2c9;
+      border-color: var(--green-4);
+    }
+
+    .gap.selected::after {
+      content: ",";
+      position: absolute;
+      top: 3px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 28px;
+      font-weight: 800;
+      color: var(--green-5);
+      line-height: 1;
+    }
+
+    .block-title {
+      margin: 0 0 14px;
+      color: var(--green-5);
+      font-size: 1.06rem;
+    }
+
+    .block-subtitle {
+      margin: 0 0 12px;
+      color: #355438;
+      font-size: .97rem;
+      line-height: 1.55;
+    }
+
+    .feedback {
+      padding: 14px 16px;
+      border-radius: 16px;
+      font-weight: 700;
+      display: none;
+      border-left: 8px solid transparent;
+    }
+
+    .feedback.show { display: block; }
+
+    .feedback.error {
+      background: var(--danger-bg);
+      color: #a02b2b;
+      border-left-color: var(--danger);
+    }
+
+    .feedback.success {
+      background: var(--success-bg);
+      color: var(--success);
+      border-left-color: var(--success);
+    }
+
+    .grammar-row {
+      display: grid;
+      grid-template-columns: minmax(210px, 1fr) auto minmax(180px, .75fr);
+      gap: 14px;
+      align-items: center;
+    }
+
+    .plus-sign {
+      font-size: 2rem;
+      font-weight: 900;
+      color: var(--green-4);
+      text-align: center;
+    }
+
+    .select-wrap label {
+      display: block;
+      font-size: .95rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: var(--green-5);
+    }
+
+    select {
+      width: 100%;
+      min-height: 48px;
+      padding: 10px 14px;
+      border-radius: 14px;
+      border: 2px solid rgba(111,188,98,0.28);
+      background: #fff;
+      color: var(--text);
+      font-size: 1rem;
+      outline: none;
+    }
+
+    select:focus {
+      border-color: var(--green-4);
+      box-shadow: 0 0 0 4px rgba(111,188,98,0.12);
+    }
+
+    .footer-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 6px;
+    }
+
+    .muted {
+      color: #55725a;
+      font-size: .96rem;
+    }
+
+    .final-screen {
+      text-align: center;
+      padding: 16px 0 8px;
+    }
+
+    .final-score {
+      font-size: clamp(2rem, 3vw + 1rem, 3rem);
+      font-weight: 900;
+      color: var(--green-5);
+      margin: 6px 0 14px;
+    }
+
+    .chip-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+      margin-top: 16px;
+    }
+
+    .chip {
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: #edf8e7;
+      border: 1px solid rgba(47,125,50,0.16);
+      color: var(--green-5);
+      font-weight: 700;
+    }
+
+    @media (max-width: 760px) {
+      .page { width: min(100% - 16px, 1000px); padding-top: 16px; }
+      .panel, .hero { padding: 18px; border-radius: 22px; }
+      .grammar-row { grid-template-columns: 1fr; }
+      .plus-sign { line-height: 1; }
+      .sentence-text { line-height: 2.2; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <section class="hero">
+      <h1 class="title">Игровой тренажёр: обособленные дополнения</h1>
+      <p class="subtitle">
+        Тренажёр помогает отработать три шага: найти обособленное дополнение, определить места для запятых и назвать,
+        из чего состоит конструкция.
+      </p>
+    </section>
+
+    <section class="toolbar">
+      <div class="progress-wrap">
+        <div class="progress-label">Прогресс</div>
+        <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+      </div>
+      <div class="score-pill" id="scorePill">Верно: 0 / 0</div>
+    </section>
+
+    <section class="panel">
+      <div id="startScreen" class="screen">
+        <div class="welcome">
+          <h2>Начать игру</h2>
+          <p>
+            На экране будет появляться по одному предложению. Сначала нужно выделить всё, что относится к обособленному дополнению.
+            Затем — указать места, где нужны запятые. После этого — выбрать, из чего состоит обособленное дополнение.
+          </p>
+        </div>
+
+        <div class="rules">
+          <div class="rule-card">
+            <div class="num">1</div>
+            <strong>Шаг 1.</strong>
+            <div>Выделите слова, которые входят в обособленное дополнение.</div>
+          </div>
+          <div class="rule-card">
+            <div class="num">2</div>
+            <strong>Шаг 2.</strong>
+            <div>Нажмите между словами там, где должны стоять запятые.</div>
+          </div>
+          <div class="rule-card">
+            <div class="num">3</div>
+            <strong>Шаг 3.</strong>
+            <div>Выберите предлог и часть речи главного слова конструкции.</div>
+          </div>
+        </div>
+
+        <div class="controls">
+          <button class="btn-primary" id="startBtn">Начать игру</button>
+        </div>
+      </div>
+
+      <div id="gameScreen" class="screen hidden">
+        <div class="question-head">
+          <h3 id="taskTitle">Предложение 1</h3>
+          <div class="tag" id="stepTag">Шаг 1 из 3</div>
+        </div>
+
+        <div class="sentence-card">
+          <p id="instructionText">Выделить всё, что относится к обособленному дополнению.</p>
+          <div class="sentence-text" id="sentenceArea"></div>
+        </div>
+
+        <div class="block" id="step1Block">
+          <h4 class="block-title">Шаг 1. Выделение фрагмента</h4>
+          <p class="block-subtitle">Нажимайте на слова предложения, чтобы выделить нужный фрагмент.</p>
+          <div class="controls" style="justify-content:flex-start;">
+            <button class="btn-primary" id="checkStep1Btn">Проверить</button>
+            <button class="btn-secondary" id="clearStep1Btn">Снять выделение</button>
+          </div>
+        </div>
+
+        <div class="block hidden" id="step2Block">
+          <h4 class="block-title">Шаг 2. Где нужны запятые?</h4>
+          <p class="block-subtitle">Нажмите между словами там, где должны стоять запятые. Выбранные места обозначаются запятой.</p>
+          <div class="sentence-text" id="commaArea"></div>
+          <div class="controls" style="justify-content:flex-start; margin-top:12px;">
+            <button class="btn-primary" id="checkStep2Btn">Проверить</button>
+            <button class="btn-secondary" id="clearStep2Btn">Очистить</button>
+          </div>
+        </div>
+
+        <div class="block hidden" id="step3Block">
+          <h4 class="block-title">Шаг 3. Из чего состоит обособленное дополнение?</h4>
+          <div class="grammar-row">
+            <div class="select-wrap">
+              <label for="prepSelect">Предлог</label>
+              <select id="prepSelect">
+                <option value="">Выберите вариант</option>
+                <option value="кроме">предлог "кроме"</option>
+                <option value="за исключением">предлог "за исключением"</option>
+                <option value="исключая">предлог "исключая"</option>
+                <option value="помимо">предлог "помимо"</option>
+                <option value="сверх">предлог "сверх"</option>
+                <option value="включая">предлог "включая"</option>
+                <option value="наряду с">предлог "наряду с"</option>
+                <option value="вместо">предлог "вместо"</option>
+              </select>
+            </div>
+            <div class="plus-sign">+</div>
+            <div class="select-wrap">
+              <label for="posSelect">Часть речи</label>
+              <select id="posSelect">
+                <option value="">Выберите вариант</option>
+                <option value="существительное">существительное</option>
+                <option value="местоимение">местоимение</option>
+              </select>
+            </div>
+          </div>
+          <div class="controls" style="justify-content:flex-start; margin-top:16px;">
+            <button class="btn-primary" id="checkStep3Btn">Проверить</button>
+          </div>
+        </div>
+
+        <div class="feedback" id="feedbackBox"></div>
+
+        <div class="footer-row">
+          <div class="muted" id="helperText">Сначала выполните шаг 1.</div>
+          <div class="controls" style="margin-top:0; justify-content:flex-end;">
+            <button class="btn-primary hidden" id="nextBtn">Перейти к следующему предложению</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="finishScreen" class="screen hidden">
+        <div class="final-screen">
+          <h2 class="title" style="font-size: clamp(1.6rem, 2vw + 1rem, 2.2rem); margin-bottom:0;">Игра завершена</h2>
+          <div class="final-score" id="finalScore">30 / 30</div>
+          <p id="finalText" style="max-width:760px; margin:0 auto; line-height:1.7;">
+            Отличная работа! Вы прошли весь тренажёр.
+          </p>
+          <div class="chip-list">
+            <div class="chip" id="finalCorrect">Правильно с первого раза: 0</div>
+            <div class="chip" id="finalTotal">Всего предложений: 30</div>
+          </div>
+          <div class="controls" style="margin-top:20px;">
+            <button class="btn-primary" id="restartBtn">Играть ещё раз</button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const tasks = [
+      { sentence: 'Никто кроме солнца и синего неба не заглядывает в это заброшенное оконце.', fragment: 'кроме солнца и синего неба', prep: 'кроме', pos: 'существительное' },
+      { sentence: 'Вся команда за исключением запасного вратаря была готова к решающему матчу.', fragment: 'за исключением запасного вратаря', prep: 'за исключением', pos: 'существительное' },
+      { sentence: 'Помимо классической литературы подросток увлекался еще и астрономией.', fragment: 'Помимо классической литературы', prep: 'помимо', pos: 'существительное' },
+      { sentence: 'Сверх всякого ожидания конец августа в этом году оказался холодным и дождливым.', fragment: 'Сверх всякого ожидания', prep: 'сверх', pos: 'существительное' },
+      { sentence: 'Я ничего не мог различить кроме глухого шума ветра за стенами дома.', fragment: 'кроме глухого шума ветра за стенами дома', prep: 'кроме', pos: 'существительное' },
+      { sentence: 'Все присутствующие в зале включая строгого директора улыбнулись этой шутке.', fragment: 'включая строгого директора', prep: 'включая', pos: 'существительное' },
+      { sentence: 'Наряду с успехами в точных науках мальчик показывал отличные результаты в спорте.', fragment: 'Наряду с успехами в точных науках', prep: 'наряду с', pos: 'существительное' },
+      { sentence: 'Кроме старого уставшего мельника в этот праздничный день к нам никто не приходил.', fragment: 'Кроме старого уставшего мельника', prep: 'кроме', pos: 'существительное' },
+      { sentence: 'Многие лесные птицы за исключением ворон и галок давно улетели на юг.', fragment: 'за исключением ворон и галок', prep: 'за исключением', pos: 'существительное' },
+      { sentence: 'В старинном шкафу помимо потертых книг лежали пожелтевшие от времени карты.', fragment: 'помимо потертых книг', prep: 'помимо', pos: 'существительное' },
+      { sentence: 'Никто исключая меня самого не знал об этой страшной тайне.', fragment: 'исключая меня самого', prep: 'исключая', pos: 'местоимение' },
+      { sentence: 'Рассказ нового учителя сверх ожидания оказался удивительно интересным.', fragment: 'сверх ожидания', prep: 'сверх', pos: 'существительное' },
+      { sentence: 'Все ученики кроме опоздавшего Павла уже сидели за своими партами.', fragment: 'кроме опоздавшего Павла', prep: 'кроме', pos: 'существительное' },
+      { sentence: 'В трудном горном походе наряду со взрослыми альпинистами участвовали и старшеклассники.', fragment: 'наряду со взрослыми альпинистами', prep: 'наряду с', pos: 'существительное' },
+      { sentence: 'Весь южный город включая дальние окраины был погружен в полную темноту.', fragment: 'включая дальние окраины', prep: 'включая', pos: 'существительное' },
+      { sentence: 'Помимо работы в фруктовом саду дедушка любил подолгу столярничать в сарае.', fragment: 'Помимо работы в фруктовом саду', prep: 'помимо', pos: 'существительное' },
+      { sentence: 'В плетеной корзине оказались самые разные грибы за исключением благородных белых.', fragment: 'за исключением благородных белых', prep: 'за исключением', pos: 'существительное' },
+      { sentence: 'Сверх запланированного времени экспедиция потратила еще два часа на переправу через реку.', fragment: 'Сверх запланированного времени', prep: 'сверх', pos: 'существительное' },
+      { sentence: 'Никто кроме родной матери не мог так быстро успокоить плачущего ребенка.', fragment: 'кроме родной матери', prep: 'кроме', pos: 'существительное' },
+      { sentence: 'Передовой отряд включая замыкающих солдат осторожно перешел реку вброд.', fragment: 'включая замыкающих солдат', prep: 'включая', pos: 'существительное' },
+      { sentence: 'Все деревья в парке кроме одного старого дуба уже сбросили пожелтевшую листву.', fragment: 'кроме одного старого дуба', prep: 'кроме', pos: 'существительное' },
+      { sentence: 'Помимо основных уроков в новой школе открылись интересные творческие кружки.', fragment: 'Помимо основных уроков', prep: 'помимо', pos: 'существительное' },
+      { sentence: 'У всех участников олимпиады за исключением старосты класса были готовы доклады.', fragment: 'за исключением старосты класса', prep: 'за исключением', pos: 'существительное' },
+      { sentence: 'На массивном дубовом столе кроме старинных швейцарских часов ничего не было.', fragment: 'кроме старинных швейцарских часов', prep: 'кроме', pos: 'существительное' },
+      { sentence: 'В далекую научную экспедицию наряду с геологами отправились молодые биологи.', fragment: 'наряду с геологами', prep: 'наряду с', pos: 'существительное' },
+      { sentence: 'Сверх установленной дневной нормы рабочие завода выполнили еще несколько деталей.', fragment: 'Сверх установленной дневной нормы', prep: 'сверх', pos: 'существительное' },
+      { sentence: 'Все пассажиры самолета исключая самых маленьких детей должны немедленно пристегнуть ремни.', fragment: 'исключая самых маленьких детей', prep: 'исключая', pos: 'существительное' },
+      { sentence: 'В просторной комнате помимо широкого дивана и круглого стола стояло старое кожаное кресло.', fragment: 'помимо широкого дивана и круглого стола', prep: 'помимо', pos: 'существительное' },
+      { sentence: 'Никто кроме тебя не сможет решить эту сложную геометрическую задачу так быстро.', fragment: 'кроме тебя', prep: 'кроме', pos: 'местоимение' },
+      { sentence: 'Завтра на тренировку должны прийти все спортсмены включая недавно переболевших.', fragment: 'включая недавно переболевших', prep: 'включая', pos: 'существительное' }
+    ];
+
+    const startScreen = document.getElementById('startScreen');
+    const gameScreen = document.getElementById('gameScreen');
+    const finishScreen = document.getElementById('finishScreen');
+    const startBtn = document.getElementById('startBtn');
+    const restartBtn = document.getElementById('restartBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const sentenceArea = document.getElementById('sentenceArea');
+    const commaArea = document.getElementById('commaArea');
+    const taskTitle = document.getElementById('taskTitle');
+    const stepTag = document.getElementById('stepTag');
+    const instructionText = document.getElementById('instructionText');
+    const feedbackBox = document.getElementById('feedbackBox');
+    const helperText = document.getElementById('helperText');
+    const progressFill = document.getElementById('progressFill');
+    const scorePill = document.getElementById('scorePill');
+    const step1Block = document.getElementById('step1Block');
+    const step2Block = document.getElementById('step2Block');
+    const step3Block = document.getElementById('step3Block');
+    const prepSelect = document.getElementById('prepSelect');
+    const posSelect = document.getElementById('posSelect');
+    const finalScore = document.getElementById('finalScore');
+    const finalText = document.getElementById('finalText');
+    const finalCorrect = document.getElementById('finalCorrect');
+    const finalTotal = document.getElementById('finalTotal');
+
+    const checkStep1Btn = document.getElementById('checkStep1Btn');
+    const clearStep1Btn = document.getElementById('clearStep1Btn');
+    const checkStep2Btn = document.getElementById('checkStep2Btn');
+    const clearStep2Btn = document.getElementById('clearStep2Btn');
+    const checkStep3Btn = document.getElementById('checkStep3Btn');
+
+    let currentIndex = 0;
+    let selectedWords = new Set();
+    let selectedGaps = new Set();
+    let currentTokens = [];
+    let currentFragmentRange = { start: 0, end: 0 };
+    let currentCorrectGaps = [];
+    let totalCorrectFirstTry = 0;
+    let step1Solved = false;
+    let step2Solved = false;
+    let step3Solved = false;
+    let sentenceAttemptHadError = false;
+
+    function normalizeWord(word) {
+      return word.toLowerCase().replace(/[.,!?;:()«»"—-]/g, '');
+    }
+
+    function tokenize(sentence) {
+      return sentence
+        .replace(/[.,!?;:()«»]/g, '')
+        .split(/\s+/)
+        .filter(Boolean);
+    }
+
+    function locateFragment(tokens, fragment) {
+      const fragmentTokens = tokenize(fragment);
+      for (let i = 0; i <= tokens.length - fragmentTokens.length; i++) {
+        let ok = true;
+        for (let j = 0; j < fragmentTokens.length; j++) {
+          if (normalizeWord(tokens[i + j]) !== normalizeWord(fragmentTokens[j])) {
+            ok = false;
+            break;
+          }
+        }
+        if (ok) {
+          return { start: i, end: i + fragmentTokens.length - 1 };
+        }
+      }
+      return { start: 0, end: 0 };
+    }
+
+    function computeCommaGaps(range, total) {
+      const gaps = [];
+      if (range.start > 0) gaps.push(range.start);
+      if (range.end < total - 1) gaps.push(range.end + 1);
+      return gaps;
+    }
+
+    function setFeedback(type, text) {
+      feedbackBox.className = `feedback show ${type}`;
+      feedbackBox.textContent = text;
+    }
+
+    function clearFeedback() {
+      feedbackBox.className = 'feedback';
+      feedbackBox.textContent = '';
+    }
+
+    function updateProgress() {
+      const done = currentIndex;
+      const percent = Math.round((done / tasks.length) * 100);
+      progressFill.style.width = `${percent}%`;
+      scorePill.textContent = `Верно: ${totalCorrectFirstTry} / ${done}`;
+    }
+
+    function renderSentenceSelection() {
+      sentenceArea.innerHTML = '';
+      currentTokens.forEach((token, index) => {
+        const span = document.createElement('span');
+        span.className = 'token';
+        if (selectedWords.has(index)) span.classList.add('selected');
+        if (step1Solved && index >= currentFragmentRange.start && index <= currentFragmentRange.end) {
+          span.classList.add('correct', 'locked');
+        }
+        span.textContent = token;
+        span.addEventListener('click', () => {
+          if (step1Solved) return;
+          if (selectedWords.has(index)) {
+            selectedWords.delete(index);
+          } else {
+            selectedWords.add(index);
+          }
+          renderSentenceSelection();
+        });
+        sentenceArea.appendChild(span);
+      });
+    }
+
+    function renderCommaArea() {
+      commaArea.innerHTML = '';
+      currentTokens.forEach((token, index) => {
+        if (index > 0) {
+          const gap = document.createElement('span');
+          gap.className = 'gap';
+          if (selectedGaps.has(index)) gap.classList.add('selected');
+          if (step2Solved) gap.classList.add('locked');
+          gap.setAttribute('title', 'Нажмите, если здесь нужна запятая');
+          gap.addEventListener('click', () => {
+            if (step2Solved) return;
+            if (selectedGaps.has(index)) selectedGaps.delete(index);
+            else selectedGaps.add(index);
+            renderCommaArea();
+          });
+          commaArea.appendChild(gap);
+        }
+
+        const tokenSpan = document.createElement('span');
+        tokenSpan.className = 'token';
+        tokenSpan.textContent = token;
+        tokenSpan.classList.add('locked');
+        if (index >= currentFragmentRange.start && index <= currentFragmentRange.end) tokenSpan.classList.add('correct');
+        commaArea.appendChild(tokenSpan);
+      });
+    }
+
+    function resetSentenceState() {
+      selectedWords = new Set();
+      selectedGaps = new Set();
+      step1Solved = false;
+      step2Solved = false;
+      step3Solved = false;
+      sentenceAttemptHadError = false;
+      nextBtn.classList.add('hidden');
+      step2Block.classList.add('hidden');
+      step3Block.classList.add('hidden');
+      prepSelect.value = '';
+      posSelect.value = '';
+      helperText.textContent = 'Сначала выполните шаг 1.';
+      clearFeedback();
+    }
+
+    function loadTask() {
+      const task = tasks[currentIndex];
+      currentTokens = tokenize(task.sentence);
+      currentFragmentRange = locateFragment(currentTokens, task.fragment);
+      currentCorrectGaps = computeCommaGaps(currentFragmentRange, currentTokens.length);
+      resetSentenceState();
+      taskTitle.textContent = `Предложение ${currentIndex + 1}`;
+      stepTag.textContent = 'Шаг 1 из 3';
+      instructionText.textContent = 'Выделить всё, что относится к обособленному дополнению.';
+      renderSentenceSelection();
+      renderCommaArea();
+      updateProgress();
+    }
+
+    function setSolvedSelection() {
+      step1Solved = true;
+      stepTag.textContent = 'Шаг 2 из 3';
+      helperText.textContent = 'Шаг 1 выполнен. Теперь поставьте запятые.';
+      renderSentenceSelection();
+      renderCommaArea();
+      step2Block.classList.remove('hidden');
+    }
+
+    function setSolvedCommas() {
+      step2Solved = true;
+      stepTag.textContent = 'Шаг 3 из 3';
+      helperText.textContent = 'Шаг 2 выполнен. Теперь определите состав конструкции.';
+      renderCommaArea();
+      step3Block.classList.remove('hidden');
+    }
+
+    function finishSentence() {
+      step3Solved = true;
+      helperText.textContent = 'Все три шага выполнены.';
+      if (!sentenceAttemptHadError) totalCorrectFirstTry += 1;
+      updateProgress();
+      setFeedback('success', 'Молодец, всё правильно');
+      nextBtn.classList.remove('hidden');
+    }
+
+    checkStep1Btn.addEventListener('click', () => {
+      const correctSet = new Set();
+      for (let i = currentFragmentRange.start; i <= currentFragmentRange.end; i++) correctSet.add(i);
+      const isCorrect = selectedWords.size === correctSet.size && [...correctSet].every(x => selectedWords.has(x));
+      if (isCorrect) {
+        setFeedback('success', 'Шаг 1 выполнен верно.');
+        setSolvedSelection();
+      } else {
+        sentenceAttemptHadError = true;
+        setFeedback('error', 'Допущена ошибка');
+      }
+    });
+
+    clearStep1Btn.addEventListener('click', () => {
+      if (step1Solved) return;
+      selectedWords.clear();
+      renderSentenceSelection();
+      clearFeedback();
+    });
+
+    checkStep2Btn.addEventListener('click', () => {
+      const isCorrect = selectedGaps.size === currentCorrectGaps.length && currentCorrectGaps.every(x => selectedGaps.has(x));
+      if (isCorrect) {
+        setFeedback('success', 'Шаг 2 выполнен верно.');
+        setSolvedCommas();
+      } else {
+        sentenceAttemptHadError = true;
+        setFeedback('error', 'Допущена ошибка');
+      }
+    });
+
+    clearStep2Btn.addEventListener('click', () => {
+      if (step2Solved) return;
+      selectedGaps.clear();
+      renderCommaArea();
+      clearFeedback();
+    });
+
+    checkStep3Btn.addEventListener('click', () => {
+      const task = tasks[currentIndex];
+      const isCorrect = prepSelect.value === task.prep && posSelect.value === task.pos;
+      if (isCorrect) {
+        finishSentence();
+      } else {
+        sentenceAttemptHadError = true;
+        setFeedback('error', 'Допущена ошибка');
+      }
+    });
+
+    nextBtn.addEventListener('click', () => {
+      currentIndex += 1;
+      if (currentIndex >= tasks.length) {
+        gameScreen.classList.add('hidden');
+        finishScreen.classList.remove('hidden');
+        progressFill.style.width = '100%';
+        scorePill.textContent = `Верно: ${totalCorrectFirstTry} / ${tasks.length}`;
+        finalScore.textContent = `${totalCorrectFirstTry} / ${tasks.length}`;
+        finalCorrect.textContent = `Правильно с первого раза: ${totalCorrectFirstTry}`;
+        finalTotal.textContent = `Всего предложений: ${tasks.length}`;
+        finalText.textContent = totalCorrectFirstTry === tasks.length
+          ? 'Отличный результат! Все предложения пройдены без ошибок.'
+          : 'Тренажёр завершён. Можно пройти его ещё раз и улучшить результат.';
+      } else {
+        loadTask();
+      }
+    });
+
+    startBtn.addEventListener('click', () => {
+      currentIndex = 0;
+      totalCorrectFirstTry = 0;
+      startScreen.classList.add('hidden');
+      finishScreen.classList.add('hidden');
+      gameScreen.classList.remove('hidden');
+      loadTask();
+    });
+
+    restartBtn.addEventListener('click', () => {
+      startScreen.classList.add('hidden');
+      finishScreen.classList.add('hidden');
+      gameScreen.classList.remove('hidden');
+      currentIndex = 0;
+      totalCorrectFirstTry = 0;
+      loadTask();
+    });
+
+    updateProgress();
+  </script>
+</body>
+</html>
