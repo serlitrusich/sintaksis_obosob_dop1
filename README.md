@@ -1,0 +1,1 @@
+# sintaksis_obosob_dop1
